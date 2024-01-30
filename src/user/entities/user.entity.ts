@@ -14,7 +14,7 @@ export class UserEntity {
   @Column({ length: 50 })
   name: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, unique: true })
   email: string;
 
   @Column()
