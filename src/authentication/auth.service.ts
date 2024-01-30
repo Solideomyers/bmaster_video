@@ -13,29 +13,24 @@ export class AuthService {
   }
 
   async signup(userData: CreateUserDto): Promise<string> {
-    // Crear el usuario utilizando los datos proporcionados
     const newUser = await this.createUser(userData);
 
-    // Generar y retornar el token JWT para el nuevo usuario
     const token = this.generateToken(newUser);
     return token;
   }
 
   async signin(token: string): Promise<any> {
-    // Verificar si el token proporcionado es válido
     const decodedToken = this.validateToken(token);
-    // Obtener el usuario asociado con el token
+
     const user = await this.userRepository.findOne(decodedToken.id);
     if (!user) {
       throw new CustomError(404, 'User not found');
     }
-    // Devolver el usuario si el token es válido
+
     return user;
   }
 
   private async createUser(userData: CreateUserDto): Promise<any> {
-    // Implementa la lógica para crear un nuevo usuario en la base de datos
-    // Por ejemplo:
     const newUser = await this.userRepository.create(userData);
 
     const userExist = await this.userRepository.findOne({
