@@ -30,7 +30,11 @@ const options = {
     security: [{ JWTAuth: [] }],
   },
 
-  apis: ['./src/presentation/routes.ts', './src/user/user.routes.ts'],
+  apis: [
+    './src/presentation/routes.ts',
+    './src/user/user.routes.ts',
+    './src/authentication/auth.routes.ts',
+  ],
 };
 
 const specs = swaggerJsdoc(options);
