@@ -1,4 +1,6 @@
 import express, { Router } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './swagger-config';
 
 interface Options {
   port?: number;
@@ -15,6 +17,8 @@ export class Server {
 
     this.port = port;
     this.routes = routes;
+
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
   }
 
   async start() {
