@@ -31,6 +31,6 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => VideoEntity, (video) => video.user, { cascade: true })
+  @OneToMany(() => VideoEntity, (video) => video.userId, { cascade: true })
   videos: VideoEntity[];
 }
