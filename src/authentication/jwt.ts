@@ -15,7 +15,7 @@ export class JwtAdapter {
    */
   static async generateToken(
     payload: Object,
-    duration: string = '2h'
+    duration: string = '1h'
   ): Promise<string | null> {
     return new Promise((resolve) => {
       jwt.sign(payload, JWT_SEED, { expiresIn: duration }, (err, token) => {
@@ -30,12 +30,17 @@ export class JwtAdapter {
    * @param token - The JWT to be validated.
    * @returns A Promise that resolves to the decoded payload or null if the token is invalid.
    */
-  static validateToken<T>(token: string): Promise<T | null> {
-    return new Promise((resolve) => {
-      jwt.verify(token, JWT_SEED, (err, decoded) => {
-        if (err) return resolve(null);
-        resolve(decoded as T);
+  static async validateToken<T>(token: string): Promise<T | null> {
+    try {
+      const decoded = await new Promise<any>((resolve, reject) => {
+        jwt.verify(token, JWT_SEED, (err, decoded) => {
+          if (err) reject(err);
+          resolve(decoded);
+        });
       });
-    });
+      return decoded as T;
+    } catch (error) {
+      return null;
+    }
   }
 }
