@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { VideoEntity } from '../../videos/entities/video.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -21,11 +23,14 @@ export class UserEntity {
   password: string;
 
   @Column({ length: 100 })
-  userName: string;
+  username: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => VideoEntity, (video) => video.user, { cascade: true })
+  videos: VideoEntity[];
 }
