@@ -1,61 +1,52 @@
-import JWT from 'jsonwebtoken';
-import { envs } from '../config/envs';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { CustomError } from '../errors/custom.errors';
 import { CreateUserDto } from '../user/dtos/create-user.dto';
+import { BcryptAdapter } from './bcrypt';
+import { JwtAdapter } from './jwt';
 
 export class AuthService {
-  private secretKey: string;
-
-  constructor(public readonly userRepository: Repository<UserEntity>) {
-    this.secretKey = envs.JWT_SECRET || 'secret';
-  }
+  constructor(public readonly userRepository: Repository<UserEntity>) {}
 
   async signup(userData: CreateUserDto): Promise<string> {
-    const newUser = await this.createUser(userData);
-
-    const token = this.generateToken(newUser);
-    return token;
-  }
-
-  async signin(token: string): Promise<any> {
-    const decodedToken = this.validateToken(token);
-
-    const user = await this.userRepository.findOne(decodedToken.id);
-    if (!user) {
-      throw new CustomError(404, 'User not found');
-    }
-
-    return user;
-  }
-
-  private async createUser(userData: CreateUserDto): Promise<any> {
-    const newUser = await this.userRepository.create(userData);
-
-    const userExist = await this.userRepository.findOne({
-      where: { email: userData.email, name: userData.name },
+    const existingUser = await this.userRepository.findOne({
+      where: { email: userData.email },
     });
 
-    if (userExist?.email && userExist.name) {
-      throw new CustomError(404, 'User already exist');
+    if (existingUser) {
+      throw new CustomError(400, 'User with this email already exists');
     }
+
+    const hashedPassword = BcryptAdapter.hash(userData.password);
+
+    const newUser = this.userRepository.create({
+      name: userData.name,
+      email: userData.email,
+      password: hashedPassword,
+      username: userData.email,
+    });
 
     await this.userRepository.save(newUser);
-    return newUser;
+
+    const token = await JwtAdapter.generateToken({ id: newUser.id });
+
+    return token!;
   }
 
-  private generateToken(user: any): string {
-    const payload = {
-      id: user.id,
-      username: user.username,
-    };
-    return JWT.sign(payload, this.secretKey, {
-      expiresIn: '1h',
+  async signin(credentials: {
+    email: string;
+    password: string;
+  }): Promise<string> {
+    const user = await this.userRepository.findOne({
+      where: { email: credentials.email },
     });
-  }
 
-  private validateToken(token: string): any {
-    return JWT.verify(token, this.secretKey);
+    if (!user || !BcryptAdapter.compare(credentials.password, user.password)) {
+      throw new CustomError(401, 'Invalid email or password');
+    }
+
+    const token = await JwtAdapter.generateToken({ id: user.id });
+
+    return token!;
   }
 }
