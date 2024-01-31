@@ -3,7 +3,6 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { Repository } from 'typeorm';
 import { CustomError } from '../errors/custom.errors';
 import { UpdateVideoDto } from './dto/update-video.dto';
-import { AuthService } from '../authentication/auth.service';
 import { JwtAdapter } from '../authentication/jwt';
 
 export class VideoService {
@@ -13,8 +12,6 @@ export class VideoService {
     token: string
   ): Promise<VideoEntity> {
     const userId = this.getUserIdFromToken(token);
-    const data = userId.then((res) => res);
-    console.log(data);
     const videoExist = await this.videoRepository.findOne({
       where: { url: videoDto.url },
     });
@@ -32,15 +29,13 @@ export class VideoService {
     video.url = videoDto.url;
     video.description = videoDto.description;
     video.view = videoDto.view;
-    // video.user = userId
+    video.userId = video.userId;
 
     return await this.videoRepository.save(video);
   }
 
   async getAllVideos(token: string): Promise<VideoEntity[]> {
-    console.log(token);
     const userId = await this.getUserIdFromToken(token);
-    console.log(userId, 'service');
     if (!userId) {
       return await this.getPublicVideos();
     }
@@ -79,7 +74,7 @@ export class VideoService {
     return await this.videoRepository.save(video);
   }
 
-  private async getUserIdFromToken(token: string): Promise<number | null> {
+  private async getUserIdFromToken(token: string) {
     const decodedToken: any = await JwtAdapter.validateToken<{
       id: number;
     }>(token);
