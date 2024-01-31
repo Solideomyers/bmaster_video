@@ -30,7 +30,7 @@ export class JwtAdapter {
    * @param token - The JWT to be validated.
    * @returns A Promise that resolves to the decoded payload or null if the token is invalid.
    */
-  validateToken<T>(token: string): Promise<T | null> {
+  static validateToken<T>(token: string): Promise<T | null> {
     return new Promise((resolve) => {
       jwt.verify(token, JWT_SEED, (err, decoded) => {
         if (err) return resolve(null);
