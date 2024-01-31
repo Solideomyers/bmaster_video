@@ -1,32 +1,33 @@
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dtos/create-user.dto';
-import { AppDataSource } from '../data-source/data-source';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../user/entities/user.entity';
 
 export class AuthController {
   private authService: AuthService;
 
-  constructor(public readonly userRepository: Repository<UserEntity>) {
-    this.authService = new AuthService(userRepository);
-  }
-
-  async signin(req: Request, res: Response): Promise<void> {
-    try {
-      const token = await this.authService.signin(req.body);
-      res.json({ token });
-    } catch (error) {
-      res.status(401).json({ error: error });
-    }
+  constructor(authService: AuthService) {
+    this.authService = authService;
   }
 
   async signup(req: Request, res: Response): Promise<void> {
     try {
-      const token = await this.authService.signup(req.body as CreateUserDto);
-      res.json({ token });
+      const userData: CreateUserDto = req.body;
+      const token = await this.authService.signup(userData);
+      res.status(201).json({ token });
     } catch (error) {
-      res.status(400).json({ error: error });
+      console.error('Error al registrar usuario:', error);
+      res.status(500).json({ message: 'Error al registrar usuario' });
+    }
+  }
+
+  async signin(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const token = await this.authService.signin({ email, password });
+      res.status(200).json({ token });
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      res.status(401).json({ message: 'Invalid email or password' });
     }
   }
 }
