@@ -13,7 +13,8 @@ Este es un backend para gestionar videos desarrollado con Express, TypeScript, T
 
 ## Contribuyente
 
-- [Nombre del Contribuyente](https://github.com/usuario): Descripción breve del contribuyente.
+- [Francisco Myers](https://github.com/solideomyers)
+- [Linkedin]([https://github.com/solideomyers](https://www.linkedin.com/in/franciscomyers/))
 
 ## User Stories
 
@@ -35,5 +36,35 @@ Como usuario, debo poder realizar las siguientes acciones:
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/tu_usuario/backend-gestion-videos.git
+git clone https://github.com/Solideomyers/bmaster_video.git
+```
+
+2. Define tus varibles de entorno:
+
+```bash
+PORT=3000
+
+# databasee
+DB_USER=''
+DB_PASSWORD=''
+DB_LOCALHOST='localhost'
+DB_NAME=''
+DB_PORT=5432
+
+# JWT
+JWT_SEED='secret'
+```
+3. Ejecuta:
+
+```bash
+npm install
+```
+
+```bash
+npm start
+```
+4. Swagger:
+
+```bash
+visita la ruta /api-docs/
 ```
