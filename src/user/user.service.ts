@@ -13,7 +13,7 @@ export class UserService {
     user.name = userDto.name;
     user.email = userDto.email;
     user.password = userDto.password;
-    user.userName = userDto.email;
+    user.username = userDto.email;
 
     const userExist = await this.userRepository.findOne({
       where: { email: userDto.email },
