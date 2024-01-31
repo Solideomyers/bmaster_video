@@ -34,6 +34,7 @@ const options = {
     './src/presentation/routes.ts',
     './src/user/user.routes.ts',
     './src/authentication/auth.routes.ts',
+    './src/videos/video.routes.ts',
   ],
 };
 
