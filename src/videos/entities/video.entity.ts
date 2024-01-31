@@ -13,8 +13,8 @@ export class VideoEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => UserEntity, (user) => user.videos)
-  user: UserEntity;
+  @ManyToOne(() => UserEntity, (userId) => userId.videos)
+  userId: UserEntity;
 
   @Column({ default: 0 })
   numLikes: number;
