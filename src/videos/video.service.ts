@@ -7,32 +7,43 @@ import { AuthService } from '../authentication/auth.service';
 import { JwtAdapter } from '../authentication/jwt';
 
 export class VideoService {
-  constructor(
-    private videoRepository: Repository<VideoEntity>,
-    private jwtAdapter: JwtAdapter
-  ) {}
+  constructor(private videoRepository: Repository<VideoEntity>) {}
   async createVideo(
     videoDto: CreateVideoDto,
     token: string
   ): Promise<VideoEntity> {
     const userId = this.getUserIdFromToken(token);
+    const data = userId.then((res) => res);
+    console.log(data);
+    const videoExist = await this.videoRepository.findOne({
+      where: { url: videoDto.url },
+    });
 
     if (!userId) {
       throw new CustomError(401, 'Unauthorized');
     }
 
-    // Crear una nueva instancia de VideoEntity a partir de los datos del DTO
+    if (videoExist) {
+      throw new CustomError(500, 'Video already exist');
+    }
+
     const video = new VideoEntity();
     video.title = videoDto.title;
     video.url = videoDto.url;
     video.description = videoDto.description;
     video.view = videoDto.view;
+    // video.user = userId
 
-    // Guardar el nuevo video en la base de datos
     return await this.videoRepository.save(video);
   }
 
-  async getAllVideos(): Promise<VideoEntity[]> {
+  async getAllVideos(token: string): Promise<VideoEntity[]> {
+    console.log(token);
+    const userId = await this.getUserIdFromToken(token);
+    console.log(userId, 'service');
+    if (!userId) {
+      return await this.getPublicVideos();
+    }
     return await this.videoRepository.find();
   }
 
@@ -69,9 +80,22 @@ export class VideoService {
   }
 
   private async getUserIdFromToken(token: string): Promise<number | null> {
-    const decodedToken: any = await this.jwtAdapter.validateToken<{
+    const decodedToken: any = await JwtAdapter.validateToken<{
       id: number;
     }>(token);
-    return decodedToken ? decodedToken.id : null;
+    return decodedToken ? decodedToken.id : 'invalid';
+  }
+
+  public async isValidToken(token: string): Promise<boolean> {
+    try {
+      const decodedToken: any = await JwtAdapter.validateToken(token);
+      return !!decodedToken;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  private async getPublicVideos(): Promise<VideoEntity[]> {
+    return await this.videoRepository.find({ where: { view: 'public' } });
   }
 }
