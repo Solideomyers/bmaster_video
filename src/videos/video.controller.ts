@@ -15,7 +15,7 @@ export class VideoController {
 
   constructor() {
     const videoRepository = AppDataSource.getRepository(VideoEntity);
-    this.videoService = new VideoService(videoRepository, new JwtAdapter()); // Instancia JwtAdapter
+    this.videoService = new VideoService(videoRepository);
     this.jwtAdapter = new JwtAdapter();
   }
 
@@ -27,13 +27,12 @@ export class VideoController {
       }
 
       const videoDto: CreateVideoDto = req.body;
-      // Crear el video utilizando el servicio
+
       const createdVideo: VideoEntity = await this.videoService.createVideo(
         videoDto,
-        token // Pasa el token al método createVideo
+        token
       );
 
-      // Responder con el video creado
       res.status(201).json(createdVideo);
     } catch (error) {
       console.error('Error al crear el video:', error);
@@ -42,11 +41,18 @@ export class VideoController {
   }
 
   async getAllVideos(req: Request, res: Response) {
-    const videos: VideoEntity[] = await this.videoService.getAllVideos();
-    if (!videos) {
-      throw new CustomError(500, 'No hay videos');
+    try {
+      const token = req.headers.authorization;
+      console.log(token);
+
+      const videos: VideoEntity[] = await this.videoService.getAllVideos(
+        token || ''
+      );
+      res.status(200).json(videos);
+    } catch (error) {
+      console.error('Error getting all videos:', error);
+      res.status(500).json({ message: 'Error getting all videos' });
     }
-    res.status(200).json(videos);
   }
 
   async getVideoById(req: Request, res: Response) {
