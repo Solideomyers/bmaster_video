@@ -1,4 +1,4 @@
-import { MinLength } from 'class-validator';
+import { IsNotEmpty, MinLength } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -7,29 +7,21 @@ import {
 } from 'typeorm';
 
 export class CreateVideoDto {
-  @PrimaryGeneratedColumn()
-  id: number;
-  @Column()
-  userId: number;
-
-  @Column({ default: 0 })
-  numLikes: number;
-
-  @Column({ default: 0 })
-  numComments: number;
-
   @MinLength(3)
-  @Column({ length: 10 })
+  @IsNotEmpty()
   title: string;
 
-  @Column({ unique: true })
+  @IsNotEmpty()
   url: string;
 
-  @Column()
+  @IsNotEmpty()
   description: string;
 
-  @Column()
+  @IsNotEmpty()
   view: 'public' | 'private';
+
+  @IsNotEmpty()
+  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;
